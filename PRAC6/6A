@@ -1,0 +1,86 @@
+from collections import deque
+
+P = [("P1", 0, 5), ("P2", 4, 2), ("P3", 5, 4)]
+Q = 2
+
+print("PROCESS TABLE")
+print("Process  Arrival  Burst")
+for p in P: print(f"{p[0]:<8}{p[1]:<9}{p[2]}")
+
+def calc(name, gantt, start, finish):
+    print(f"\n{name}")
+    print("Gantt Chart:")
+    print(" | ".join(x[0] for x in gantt))
+    print("  ".join(str(x[1]) for x in gantt) + f"  {gantt[-1][2]}")
+
+    print("\nProcess  CT  TAT  WT  RT")
+    TAT = WT = RT = 0
+
+    for i, (n, a, b) in enumerate(P):
+        ct = finish[i]
+        tat = ct - a
+        wt = tat - b
+        rt = start[i] - a
+        TAT += tat
+        WT += wt
+        RT += rt
+        print(f"{n:<8}{ct:<4}{tat:<5}{wt:<4}{rt}")
+
+    print(f"\nAverage Turnaround Time = {TAT/len(P):.2f} ms")
+    print(f"Average Waiting Time    = {WT/len(P):.2f} ms")
+    print(f"Average Response Time   = {RT/len(P):.2f} ms")
+
+# ROUND ROBIN
+q = deque()
+rem = [p[2] for p in P]
+finish = [0] * len(P)
+start = [-1] * len(P)
+gantt = []
+t = 0
+i = 0
+
+while i < len(P) or q:
+    while i < len(P) and P[i][1] <= t:
+        q.append(i)
+        i += 1
+
+    if not q:
+        t = P[i][1]
+        continue
+
+    x = q.popleft()
+
+    if start[x] == -1:
+        start[x] = t
+
+    s = t
+    t += min(Q, rem[x])
+    rem[x] -= min(Q, rem[x])
+    gantt.append((P[x][0], s, t))
+
+    while i < len(P) and P[i][1] <= t:
+        q.append(i)
+        i += 1
+
+    if rem[x]:
+        q.append(x)
+    else:
+        finish[x] = t
+
+calc("ROUND ROBIN (Q = 2 ms)", gantt, start, finish)
+
+#FCFS 
+t = 0
+start = []
+finish = []
+gantt = []
+
+for n, a, b in P:
+    t = max(t, a)
+    start.append(t)
+    t += b
+    finish.append(t)
+    gantt.append((n, start[-1], t))
+
+calc("FCFS", gantt, start, finish)
+
