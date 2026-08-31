@@ -1,0 +1,95 @@
+print("S103 PREETHI NARESH")
+
+def fifo(reference_string, frames):
+    memory = []
+    hits = 0
+    misses = 0
+    pointer = 0
+
+    print("\n--- FIFO Page Replacement ---")
+    print("Page\tFrames\t\tResult")
+
+    for page in reference_string:
+        if page in memory:
+            hits += 1
+            result = "Hit"
+        else:
+            misses += 1
+            result = "Miss"
+
+            if len(memory) < frames:
+                memory.append(page)
+            else:
+                memory[pointer] = page
+                pointer = (pointer + 1) % frames
+
+        print(f"{page}\t{memory}\t\t{result}")
+
+    hit_ratio = hits / len(reference_string)
+    miss_ratio = misses / len(reference_string)
+
+    print("\nFIFO Results:")
+    print("Page Hits   :", hits)
+    print("Page Misses :", misses)
+    print("Hit Ratio   :", round(hit_ratio, 2))
+    print("Miss Ratio  :", round(miss_ratio, 2))
+
+
+def lru(reference_string, frames):
+    memory = []
+    recent = []
+    hits = 0
+    misses = 0
+
+    print("\n--- LRU Page Replacement ---")
+    print("Page\tFrames\t\tResult")
+
+    for page in reference_string:
+        if page in memory:
+            hits += 1
+            result = "Hit"
+
+            # Update recently used page
+            recent.remove(page)
+            recent.append(page)
+
+        else:
+            misses += 1
+            result = "Miss"
+
+            if len(memory) < frames:
+                memory.append(page)
+            else:
+                # Remove least recently used page
+                lru_page = recent.pop(0)
+                memory.remove(lru_page)
+                memory.append(page)
+
+            recent.append(page)
+
+        print(f"{page}\t{memory}\t\t{result}")
+
+    hit_ratio = hits / len(reference_string)
+    miss_ratio = misses / len(reference_string)
+
+    print("\nLRU Results:")
+    print("Page Hits   :", hits)
+    print("Page Misses :", misses)
+    print("Hit Ratio   :", round(hit_ratio, 2))
+    print("Miss Ratio  :", round(miss_ratio, 2))
+
+
+# Main Program
+print("=== MEMORY MANAGEMENT: FIFO & LRU ===")
+
+reference_string = list(map(int, input(
+    "Enter page reference string (space separated): "
+).split()))
+
+frames = int(input("Enter number of frames: "))
+
+if frames <= 0:
+    print("Number of frames must be greater than 0.")
+else:
+    fifo(reference_string, frames)
+    lru(reference_string, frames)
